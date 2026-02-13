@@ -32,7 +32,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/sign-in");
-    } else if (session?.user.userType) {
+    } else if ((session?.user as Record<string, unknown>)?.userType) {
       router.push("/");
     }
   }, [isPending, session, router]);
@@ -45,7 +45,7 @@ export default function OnboardingPage() {
     );
   }
 
-  if (!session || session.user.userType) {
+  if (!session || (session.user as Record<string, unknown>).userType) {
     return null;
   }
 
@@ -63,7 +63,7 @@ export default function OnboardingPage() {
       city,
       country,
       dateOfBirth,
-    });
+    } as Record<string, unknown>);
 
     if (error) {
       setError(error.message ?? "Une erreur est survenue");

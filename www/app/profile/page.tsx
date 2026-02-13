@@ -45,10 +45,11 @@ export default function ProfilePage() {
   }
 
   function startEditing() {
-    setName(session!.user.name ?? "");
-    setCity(session!.user.city ?? "");
-    setCountry(session!.user.country ?? "");
-    setDateOfBirth(session!.user.dateOfBirth ?? "");
+    const u = session!.user as Record<string, unknown>;
+    setName((u.name as string) ?? "");
+    setCity((u.city as string) ?? "");
+    setCountry((u.country as string) ?? "");
+    setDateOfBirth((u.dateOfBirth as string) ?? "");
     setError("");
     setSuccess(false);
     setEditing(true);
@@ -63,7 +64,7 @@ export default function ProfilePage() {
       city,
       country,
       dateOfBirth,
-    });
+    } as Record<string, unknown>);
 
     if (error) {
       setError(error.message ?? "Une erreur est survenue");
@@ -74,7 +75,7 @@ export default function ProfilePage() {
     setLoading(false);
   }
 
-  const user = session.user;
+  const user = session.user as Record<string, unknown>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,14 +107,14 @@ export default function ProfilePage() {
         {/* Avatar + name */}
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground">
-            {user.name?.charAt(0).toUpperCase() ?? "?"}
+            {(user.name as string)?.charAt(0).toUpperCase() ?? "?"}
           </div>
           <div>
             <h1 className="text-xl font-serif text-foreground">
-              {user.name}
+              {user.name as string}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {user.email}
+              {user.email as string}
             </p>
           </div>
         </div>
@@ -199,25 +200,25 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="divide-y divide-border">
-              <Row label="Nom" value={user.name} />
-              <Row label="Email" value={user.email} />
+              <Row label="Nom" value={user.name as string} />
+              <Row label="Email" value={user.email as string} />
               <Row
                 label="Type"
                 value={user.userType === "owner" ? "Proprietaire" : "Client"}
               />
-              <Row label="Pays" value={user.country} />
-              <Row label="Ville" value={user.city} />
+              <Row label="Pays" value={user.country as string} />
+              <Row label="Ville" value={user.city as string} />
               <Row
                 label="Date de naissance"
                 value={
                   user.dateOfBirth
-                    ? new Date(user.dateOfBirth).toLocaleDateString("fr-FR")
+                    ? new Date(user.dateOfBirth as string).toLocaleDateString("fr-FR")
                     : undefined
                 }
               />
               <Row
                 label="Membre depuis"
-                value={new Date(user.createdAt).toLocaleDateString("fr-FR")}
+                value={new Date(user.createdAt as string).toLocaleDateString("fr-FR")}
               />
             </div>
           )}

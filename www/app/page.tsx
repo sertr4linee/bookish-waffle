@@ -17,7 +17,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session && !session.user.userType) {
+    if (session && !(session.user as Record<string, unknown>).userType) {
       router.push("/onboarding");
     }
   }, [session, router]);
