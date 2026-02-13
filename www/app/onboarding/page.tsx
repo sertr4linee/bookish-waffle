@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession, authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { Car, Building2 } from "lucide-react";
 
 const countries = [
   "France",
@@ -28,14 +29,6 @@ export default function OnboardingPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (isPending) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <p className="text-sm text-zinc-500">Chargement...</p>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/sign-in");
@@ -43,6 +36,14 @@ export default function OnboardingPage() {
       router.push("/");
     }
   }, [isPending, session, router]);
+
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Chargement...</p>
+      </div>
+    );
+  }
 
   if (!session || session.user.userType) {
     return null;
@@ -73,7 +74,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
         {/* Progress */}
         <div className="flex items-center gap-2">
@@ -81,9 +82,7 @@ export default function OnboardingPage() {
             <div
               key={s}
               className={`h-1.5 flex-1 rounded-full transition-colors ${
-                s <= step
-                  ? "bg-zinc-900 dark:bg-zinc-100"
-                  : "bg-zinc-200 dark:bg-zinc-800"
+                s <= step ? "bg-primary" : "bg-secondary"
               }`}
             />
           ))}
@@ -93,10 +92,10 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <h1 className="text-2xl font-serif tracking-tight text-foreground">
                 Bienvenue, {session.user.name}
               </h1>
-              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Quel est votre profil ?
               </p>
             </div>
@@ -106,18 +105,16 @@ export default function OnboardingPage() {
                 onClick={() => setUserType("owner")}
                 className={`flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all ${
                   userType === "owner"
-                    ? "border-zinc-900 bg-zinc-900/5 dark:border-zinc-100 dark:bg-zinc-100/5"
-                    : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/40"
                 }`}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-2xl dark:bg-zinc-800">
-                  🏢
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                  <Building2 className="w-5 h-5 text-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                    Proprietaire
-                  </p>
-                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="font-medium text-foreground">Proprietaire</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Je propose des vehicules
                   </p>
                 </div>
@@ -127,18 +124,16 @@ export default function OnboardingPage() {
                 onClick={() => setUserType("customer")}
                 className={`flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all ${
                   userType === "customer"
-                    ? "border-zinc-900 bg-zinc-900/5 dark:border-zinc-100 dark:bg-zinc-100/5"
-                    : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/40"
                 }`}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-2xl dark:bg-zinc-800">
-                  🚗
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                  <Car className="w-5 h-5 text-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                    Client
-                  </p>
-                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="font-medium text-foreground">Client</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Je cherche un vehicule
                   </p>
                 </div>
@@ -148,7 +143,7 @@ export default function OnboardingPage() {
             <button
               onClick={() => userType && setStep(2)}
               disabled={!userType}
-              className="flex w-full items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="flex w-full items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
               Continuer
             </button>
@@ -159,27 +154,24 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <h1 className="text-2xl font-serif tracking-tight text-foreground">
                 Vos informations
               </h1>
-              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Completez votre profil
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label
-                  htmlFor="country"
-                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                >
+                <label htmlFor="country" className="block text-sm font-medium text-foreground">
                   Pays
                 </label>
                 <select
                   id="country"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Selectionnez un pays</option>
                   {countries.map((c) => (
@@ -191,10 +183,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                >
+                <label htmlFor="city" className="block text-sm font-medium text-foreground">
                   Ville
                 </label>
                 <input
@@ -202,16 +191,13 @@ export default function OnboardingPage() {
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="Votre ville"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="dateOfBirth"
-                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                >
+                <label htmlFor="dateOfBirth" className="block text-sm font-medium text-foreground">
                   Date de naissance
                 </label>
                 <input
@@ -219,26 +205,26 @@ export default function OnboardingPage() {
                   type="date"
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             )}
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
-                className="flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="flex flex-1 items-center justify-center rounded-full border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
               >
                 Retour
               </button>
               <button
                 onClick={handleFinish}
                 disabled={loading || !city || !country || !dateOfBirth}
-                className="flex flex-1 items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="flex flex-1 items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
               >
                 {loading ? "Enregistrement..." : "Terminer"}
               </button>

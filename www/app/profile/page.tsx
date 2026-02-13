@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession, authClient, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, LogOut } from "lucide-react";
 
 const countries = [
   "France",
@@ -32,8 +33,8 @@ export default function ProfilePage() {
 
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <p className="text-sm text-zinc-500">Chargement...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Chargement...</p>
       </div>
     );
   }
@@ -76,15 +77,16 @@ export default function ProfilePage() {
   const user = session.user;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
           <Link
             href="/"
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Retour
+            <ArrowLeft className="w-4 h-4" />
+            Retour
           </Link>
           <button
             onClick={() =>
@@ -92,8 +94,9 @@ export default function ProfilePage() {
                 fetchOptions: { onSuccess: () => router.push("/sign-in") },
               })
             }
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
+            <LogOut className="w-4 h-4" />
             Se deconnecter
           </button>
         </div>
@@ -102,29 +105,29 @@ export default function ProfilePage() {
       <main className="mx-auto max-w-2xl px-4 py-10">
         {/* Avatar + name */}
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xl font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground">
             {user.name?.charAt(0).toUpperCase() ?? "?"}
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            <h1 className="text-xl font-serif text-foreground">
               {user.name}
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               {user.email}
             </p>
           </div>
         </div>
 
         {/* Info card */}
-        <div className="mt-8 rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+        <div className="mt-8 rounded-xl border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <h2 className="text-sm font-semibold text-foreground">
               Informations personnelles
             </h2>
             {!editing && (
               <button
                 onClick={startEditing}
-                className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Modifier
               </button>
@@ -134,87 +137,73 @@ export default function ProfilePage() {
           {editing ? (
             <div className="space-y-4 p-6">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Nom
-                </label>
+                <label className="block text-sm font-medium text-foreground">Nom</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Pays
-                </label>
+                <label className="block text-sm font-medium text-foreground">Pays</label>
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Selectionnez un pays</option>
                   {countries.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
+                    <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Ville
-                </label>
+                <label className="block text-sm font-medium text-foreground">Ville</label>
                 <input
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Date de naissance
-                </label>
+                <label className="block text-sm font-medium text-foreground">Date de naissance</label>
                 <input
                   type="date"
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                  className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {error}
-                </p>
+                <p className="text-sm text-destructive">{error}</p>
               )}
 
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setEditing(false)}
-                  className="flex flex-1 items-center justify-center rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="flex flex-1 items-center justify-center rounded-full border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="flex flex-1 items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className="flex flex-1 items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                 >
                   {loading ? "Enregistrement..." : "Enregistrer"}
                 </button>
               </div>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <div className="divide-y divide-border">
               <Row label="Nom" value={user.name} />
               <Row label="Email" value={user.email} />
               <Row
                 label="Type"
-                value={
-                  user.userType === "owner" ? "Proprietaire" : "Client"
-                }
+                value={user.userType === "owner" ? "Proprietaire" : "Client"}
               />
               <Row label="Pays" value={user.country} />
               <Row label="Ville" value={user.city} />
@@ -235,7 +224,7 @@ export default function ProfilePage() {
         </div>
 
         {success && (
-          <p className="mt-4 text-center text-sm text-green-600 dark:text-green-400">
+          <p className="mt-4 text-center text-sm text-primary font-medium">
             Profil mis a jour avec succes
           </p>
         )}
@@ -247,8 +236,8 @@ export default function ProfilePage() {
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="flex items-center justify-between px-6 py-3.5">
-      <span className="text-sm text-zinc-500 dark:text-zinc-400">{label}</span>
-      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-foreground">
         {value ?? "—"}
       </span>
     </div>
