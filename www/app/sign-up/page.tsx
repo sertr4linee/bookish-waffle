@@ -98,13 +98,29 @@ export default function SignUpPage() {
             />
           </div>
 
+          <div className="flex items-start gap-2">
+            <input
+              id="consent"
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-1 rounded border-border"
+            />
+            <label htmlFor="consent" className="text-xs text-muted-foreground">
+              J&apos;accepte les{" "}
+              <Link href="/terms" className="underline hover:text-foreground">Conditions Generales</Link>
+              {" "}et la{" "}
+              <Link href="/privacy" className="underline hover:text-foreground">Politique de Confidentialite</Link>
+            </label>
+          </div>
+
           {error && (
             <p className="text-sm text-destructive">{error}</p>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !consent}
             className="flex w-full items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {loading ? "Inscription..." : "S'inscrire"}

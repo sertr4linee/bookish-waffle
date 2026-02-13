@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 export default function Footer() {
   return (
     <footer className="py-12 border-t border-border">
@@ -37,13 +39,26 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-mono text-muted-foreground mb-4">LEGAL</h4>
             <ul className="space-y-2">
-              {["Politique_Confidentialite", "Conditions_Generales", "Assurance_Details", "Mentions_Legales"].map((link) => (
-                <li key={link}>
-                  <a href="#" className="text-sm hover:text-primary transition-colors">
-                    {link}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <Link href="/privacy" className="text-sm hover:text-primary transition-colors">
+                  Politique_Confidentialite
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-sm hover:text-primary transition-colors">
+                  Conditions_Generales
+                </Link>
+              </li>
+              <li>
+                <Link href="/cancellation" className="text-sm hover:text-primary transition-colors">
+                  Politique_Annulation
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">
+                  Mentions_Legales
+                </a>
+              </li>
             </ul>
           </div>
 
