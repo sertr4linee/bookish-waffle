@@ -1,9 +1,9 @@
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
-import Database from "better-sqlite3";
+import { getDb } from "./db";
 
 export const auth = betterAuth({
-  database: new Database("./sqlite.db"),
+  database: getDb(),
   emailAndPassword: {
     enabled: true,
   },
