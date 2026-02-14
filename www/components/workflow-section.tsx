@@ -35,10 +35,10 @@ export default function WorkflowSection() {
   return (
     <section id="manifesto" className="py-24 bg-secondary/30">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-start justify-between mb-16">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-10 md:mb-16 gap-4">
           <div>
             <span className="text-xs font-mono text-muted-foreground tracking-wider">{"◆ COMMENT_CA_MARCHE"}</span>
-            <h2 className="font-serif text-4xl md:text-5xl mt-4 max-w-md leading-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl mt-4 max-w-md leading-tight">
               De la recherche aux cles en main.
             </h2>
           </div>
@@ -47,7 +47,7 @@ export default function WorkflowSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {steps.map((step, index) => (
             <div key={step.number} className="relative">
               <div className="bg-card border border-border rounded-2xl p-6 h-full">

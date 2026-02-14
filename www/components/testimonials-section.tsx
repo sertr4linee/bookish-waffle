@@ -39,10 +39,10 @@ export default function TestimonialsSection() {
   return (
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-start justify-between mb-16">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-10 md:mb-16 gap-4">
           <div>
             <span className="text-xs font-mono text-muted-foreground tracking-wider">{"◆ TEMOIGNAGES"}</span>
-            <h2 className="font-serif text-4xl md:text-5xl mt-4 max-w-md leading-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl mt-4 max-w-md leading-tight">
               Ils roulent avec AutoLoc
             </h2>
           </div>

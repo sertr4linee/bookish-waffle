@@ -4,10 +4,10 @@ export default function FeaturesSection() {
   return (
     <section id="features" className="py-24">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-start justify-between mb-16">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-10 md:mb-16 gap-4">
           <div>
             <span className="text-xs font-mono text-muted-foreground tracking-wider">{"◆ NOS_AVANTAGES"}</span>
-            <h2 className="font-serif text-4xl md:text-5xl mt-4 max-w-lg leading-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl mt-4 max-w-lg leading-tight">
               Pourquoi choisir AutoLoc
             </h2>
           </div>
@@ -99,8 +99,8 @@ export default function FeaturesSection() {
         <div className="grid md:grid-cols-2 gap-6">
           {/* Reservation rapide */}
           <div className="bg-card border border-border rounded-2xl p-6">
-            <div className="flex gap-6">
-              <div className="bg-secondary/50 rounded-xl p-4 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+              <div className="bg-secondary/50 rounded-xl p-4 flex-shrink-0 self-start">
                 <div className="relative w-20 h-20 rounded-full border-4 border-accent flex items-center justify-center">
                   <Zap className="w-8 h-8 text-foreground" />
                 </div>
@@ -119,7 +119,7 @@ export default function FeaturesSection() {
 
           {/* Flotte */}
           <div className="bg-card border border-border rounded-2xl p-6">
-            <div className="flex gap-6">
+            <div className="flex flex-col-reverse sm:flex-row gap-4 sm:gap-6">
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-xs font-mono text-muted-foreground">CATALOGUE</span>
@@ -129,7 +129,7 @@ export default function FeaturesSection() {
                   Citadines, SUV, berlines, utilitaires... Trouvez le vehicule parfait pour chaque occasion.
                 </p>
               </div>
-              <div className="bg-secondary/50 rounded-xl p-4 flex-shrink-0">
+              <div className="bg-secondary/50 rounded-xl p-4 flex-shrink-0 self-start">
                 <div className="flex gap-1">
                   {["5", "0", "0", "0"].map((num, i) => (
                     <div

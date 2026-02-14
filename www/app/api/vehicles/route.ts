@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, generateId } from "@/lib/db";
-import { getSessionOrThrow, getSessionOrNull } from "@/lib/auth-helpers";
+import { query, generateId } from "@/lib/db";
+import { getSessionOrThrow } from "@/lib/auth-helpers";
 import { vehicleSchema } from "@/lib/validators";
 import { haversineDistance } from "@/lib/here-maps";
 
 // GET /api/vehicles — List/search vehicles
 export async function GET(req: NextRequest) {
-  const db = getDb();
   const params = req.nextUrl.searchParams;
 
   const type = params.get("type");
@@ -14,48 +13,47 @@ export async function GET(req: NextRequest) {
   const maxPrice = params.get("maxPrice");
   const lat = params.get("lat");
   const lng = params.get("lng");
-  const radius = params.get("radius"); // km
+  const radius = params.get("radius");
   const ownerId = params.get("ownerId");
   const startDate = params.get("startDate");
   const endDate = params.get("endDate");
 
-  let query = "SELECT * FROM vehicle WHERE isActive = 1";
+  let q = `SELECT * FROM vehicle WHERE "isActive" = TRUE`;
   const queryParams: unknown[] = [];
+  let paramIndex = 1;
 
   if (ownerId) {
-    query = "SELECT * FROM vehicle WHERE ownerId = ?";
+    q = `SELECT * FROM vehicle WHERE "ownerId" = $${paramIndex++}`;
     queryParams.push(ownerId);
   }
 
   if (type) {
-    query += " AND type = ?";
+    q += ` AND type = $${paramIndex++}`;
     queryParams.push(type);
   }
   if (minPrice) {
-    query += " AND pricePerDay >= ?";
+    q += ` AND "pricePerDay" >= $${paramIndex++}`;
     queryParams.push(Number(minPrice));
   }
   if (maxPrice) {
-    query += " AND pricePerDay <= ?";
+    q += ` AND "pricePerDay" <= $${paramIndex++}`;
     queryParams.push(Number(maxPrice));
   }
 
-  // Bounding box pre-filter for geo search
   if (lat && lng && radius) {
     const latNum = Number(lat);
     const lngNum = Number(lng);
     const radiusNum = Number(radius);
     const latDelta = radiusNum / 111;
     const lngDelta = radiusNum / (111 * Math.cos(latNum * Math.PI / 180));
-    query += " AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?";
+    q += ` AND lat BETWEEN $${paramIndex++} AND $${paramIndex++} AND lng BETWEEN $${paramIndex++} AND $${paramIndex++}`;
     queryParams.push(latNum - latDelta, latNum + latDelta, lngNum - lngDelta, lngNum + lngDelta);
   }
 
-  query += " ORDER BY createdAt DESC";
+  q += ` ORDER BY "createdAt" DESC`;
 
-  let vehicles = db.prepare(query).all(...queryParams) as Array<Record<string, unknown>>;
+  let vehicles = await query(q, queryParams) as Array<Record<string, unknown>>;
 
-  // Haversine post-filter
   if (lat && lng && radius) {
     const latNum = Number(lat);
     const lngNum = Number(lng);
@@ -65,17 +63,16 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Filter by date availability
   if (startDate && endDate) {
-    const unavailable = db.prepare(
-      `SELECT DISTINCT vehicleId FROM vehicle_availability
-       WHERE startDate <= ? AND endDate >= ?`
-    ).all(endDate, startDate) as Array<{ vehicleId: string }>;
+    const unavailable = await query(
+      `SELECT DISTINCT "vehicleId" FROM vehicle_availability
+       WHERE "startDate" <= $1 AND "endDate" >= $2`,
+      [endDate, startDate]
+    ) as Array<{ vehicleId: string }>;
     const unavailableIds = new Set(unavailable.map((u) => u.vehicleId));
     vehicles = vehicles.filter((v) => !unavailableIds.has(v.id as string));
   }
 
-  // Parse photos JSON
   const result = vehicles.map((v) => ({
     ...v,
     photos: JSON.parse((v.photos as string) || "[]"),
@@ -98,28 +95,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const db = getDb();
     const id = generateId();
     const data = parsed.data;
 
-    db.prepare(
-      `INSERT INTO vehicle (id, ownerId, name, type, description, pricePerDay, address, lat, lng, accessMethod)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      id,
-      session.user.id,
-      data.name,
-      data.type,
-      data.description,
-      data.pricePerDay,
-      data.address,
-      data.lat ?? null,
-      data.lng ?? null,
-      data.accessMethod,
+    await query(
+      `INSERT INTO vehicle (id, "ownerId", name, type, description, "pricePerDay", address, lat, lng, "accessMethod")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [id, session.user.id, data.name, data.type, data.description, data.pricePerDay, data.address, data.lat ?? null, data.lng ?? null, data.accessMethod]
     );
 
-    const vehicle = db.prepare("SELECT * FROM vehicle WHERE id = ?").get(id);
-    return NextResponse.json(vehicle, { status: 201 });
+    const rows = await query(`SELECT * FROM vehicle WHERE id = $1`, [id]);
+    return NextResponse.json(rows[0], { status: 201 });
   } catch (e) {
     if ((e as Error).message === "Unauthorized") {
       return NextResponse.json({ error: "Non autorise" }, { status: 401 });

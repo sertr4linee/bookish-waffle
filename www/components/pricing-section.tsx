@@ -51,23 +51,23 @@ export default function PricingSection() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <span className="text-xs font-mono text-muted-foreground tracking-wider">{"◆ TARIFS"}</span>
-          <h2 className="font-serif text-4xl md:text-5xl mt-4 mb-4">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl mt-4 mb-4">
             Roulez malin,
             <br />
             louez sans frais caches
           </h2>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
             <div className="bg-[#fffef0] px-3 py-1 rounded shadow-sm rotate-[-2deg] border border-amber-100">
               <span className="text-xs font-mono">INSCRIPTION_GRATUITE</span>
             </div>
-            <p className="text-muted-foreground text-sm">Transparent et sans engagement</p>
+            <p className="text-muted-foreground text-sm hidden sm:block">Transparent et sans engagement</p>
             <div className="bg-[#fffef0] px-3 py-1 rounded shadow-sm rotate-[2deg] border border-amber-100">
               <span className="text-xs font-mono">SANS_COMMISSION*</span>
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}

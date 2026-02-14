@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, generateId } from "@/lib/db";
+import { query, generateId } from "@/lib/db";
 import { getSessionOrThrow } from "@/lib/auth-helpers";
 import { messageSchema } from "@/lib/validators";
 
@@ -10,10 +10,9 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getSessionOrThrow();
-    const db = getDb();
 
-    // Verify access
-    const booking = db.prepare("SELECT * FROM booking WHERE id = ?").get(id) as Record<string, unknown> | undefined;
+    const bookingRows = await query(`SELECT * FROM booking WHERE id = $1`, [id]);
+    const booking = bookingRows[0] as Record<string, unknown> | undefined;
     if (!booking) {
       return NextResponse.json({ error: "Reservation introuvable" }, { status: 404 });
     }
@@ -21,18 +20,19 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Non autorise" }, { status: 403 });
     }
 
-    const messages = db.prepare(
-      `SELECT m.*, u.name as senderName
+    const messages = await query(
+      `SELECT m.*, u.name as "senderName"
        FROM message m
-       JOIN user u ON m.senderId = u.id
-       WHERE m.bookingId = ?
-       ORDER BY m.createdAt ASC`
-    ).all(id);
+       JOIN "user" u ON m."senderId" = u.id
+       WHERE m."bookingId" = $1
+       ORDER BY m."createdAt" ASC`,
+      [id]
+    );
 
-    // Mark messages as read
-    db.prepare(
-      "UPDATE message SET isRead = 1 WHERE bookingId = ? AND senderId != ?"
-    ).run(id, session.user.id);
+    await query(
+      `UPDATE message SET "isRead" = TRUE WHERE "bookingId" = $1 AND "senderId" != $2`,
+      [id, session.user.id]
+    );
 
     return NextResponse.json(messages);
   } catch (e) {
@@ -48,10 +48,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getSessionOrThrow();
-    const db = getDb();
 
-    // Verify access
-    const booking = db.prepare("SELECT * FROM booking WHERE id = ?").get(id) as Record<string, unknown> | undefined;
+    const bookingRows = await query(`SELECT * FROM booking WHERE id = $1`, [id]);
+    const booking = bookingRows[0] as Record<string, unknown> | undefined;
     if (!booking) {
       return NextResponse.json({ error: "Reservation introuvable" }, { status: 404 });
     }
@@ -66,18 +65,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     const msgId = generateId();
-    db.prepare(
-      "INSERT INTO message (id, bookingId, senderId, content) VALUES (?, ?, ?, ?)"
-    ).run(msgId, id, session.user.id, parsed.data.content);
+    await query(
+      `INSERT INTO message (id, "bookingId", "senderId", content) VALUES ($1, $2, $3, $4)`,
+      [msgId, id, session.user.id, parsed.data.content]
+    );
 
-    const message = db.prepare(
-      `SELECT m.*, u.name as senderName
+    const msgRows = await query(
+      `SELECT m.*, u.name as "senderName"
        FROM message m
-       JOIN user u ON m.senderId = u.id
-       WHERE m.id = ?`
-    ).get(msgId);
+       JOIN "user" u ON m."senderId" = u.id
+       WHERE m.id = $1`,
+      [msgId]
+    );
 
-    return NextResponse.json(message, { status: 201 });
+    return NextResponse.json(msgRows[0], { status: 201 });
   } catch (e) {
     if ((e as Error).message === "Unauthorized") {
       return NextResponse.json({ error: "Non autorise" }, { status: 401 });

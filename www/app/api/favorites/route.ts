@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, generateId } from "@/lib/db";
+import { query, generateId } from "@/lib/db";
 import { getSessionOrThrow } from "@/lib/auth-helpers";
 
 // GET /api/favorites — List user's favorites
 export async function GET() {
   try {
     const session = await getSessionOrThrow();
-    const db = getDb();
 
-    const favorites = db.prepare(
-      `SELECT f.*, v.name, v.type, v.pricePerDay, v.photos, v.address, v.isActive
+    const favorites = await query(
+      `SELECT f.*, v.name, v.type, v."pricePerDay", v.photos, v.address, v."isActive"
        FROM favorite f
-       JOIN vehicle v ON f.vehicleId = v.id
-       WHERE f.userId = ?
-       ORDER BY f.createdAt DESC`
-    ).all(session.user.id) as Array<Record<string, unknown>>;
+       JOIN vehicle v ON f."vehicleId" = v.id
+       WHERE f."userId" = $1
+       ORDER BY f."createdAt" DESC`,
+      [session.user.id]
+    ) as Array<Record<string, unknown>>;
 
     const result = favorites.map((f) => ({
       ...f,
@@ -40,19 +40,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "vehicleId requis" }, { status: 400 });
     }
 
-    const db = getDb();
-    const existing = db.prepare(
-      "SELECT id FROM favorite WHERE userId = ? AND vehicleId = ?"
-    ).get(session.user.id, vehicleId) as { id: string } | undefined;
+    const existingRows = await query(
+      `SELECT id FROM favorite WHERE "userId" = $1 AND "vehicleId" = $2`,
+      [session.user.id, vehicleId]
+    );
+    const existing = existingRows[0] as { id: string } | undefined;
 
     if (existing) {
-      db.prepare("DELETE FROM favorite WHERE id = ?").run(existing.id);
+      await query(`DELETE FROM favorite WHERE id = $1`, [existing.id]);
       return NextResponse.json({ favorited: false });
     } else {
       const id = generateId();
-      db.prepare(
-        "INSERT INTO favorite (id, userId, vehicleId) VALUES (?, ?, ?)"
-      ).run(id, session.user.id, vehicleId);
+      await query(
+        `INSERT INTO favorite (id, "userId", "vehicleId") VALUES ($1, $2, $3)`,
+        [id, session.user.id, vehicleId]
+      );
       return NextResponse.json({ favorited: true }, { status: 201 });
     }
   } catch (e) {

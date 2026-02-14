@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { query } from "@/lib/db";
 import { getSessionOrThrow } from "@/lib/auth-helpers";
 import { uploadImage } from "@/lib/cloudinary";
 
@@ -10,9 +10,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getSessionOrThrow();
-    const db = getDb();
 
-    const vehicle = db.prepare("SELECT * FROM vehicle WHERE id = ?").get(id) as Record<string, unknown> | undefined;
+    const rows = await query(`SELECT * FROM vehicle WHERE id = $1`, [id]);
+    const vehicle = rows[0] as Record<string, unknown> | undefined;
     if (!vehicle) {
       return NextResponse.json({ error: "Vehicule introuvable" }, { status: 404 });
     }
@@ -41,8 +41,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     const allPhotos = [...currentPhotos, ...uploadedUrls];
-    db.prepare("UPDATE vehicle SET photos = ?, updatedAt = datetime('now') WHERE id = ?")
-      .run(JSON.stringify(allPhotos), id);
+    await query(
+      `UPDATE vehicle SET photos = $1, "updatedAt" = NOW() WHERE id = $2`,
+      [JSON.stringify(allPhotos), id]
+    );
 
     return NextResponse.json({ photos: allPhotos });
   } catch (e) {

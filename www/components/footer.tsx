@@ -2,11 +2,11 @@ import Link from "next/link"
 
 export default function Footer() {
   return (
-    <footer className="py-12 border-t border-border">
+    <footer className="py-8 md:py-12 border-t border-border">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 border-2 border-foreground rounded-sm flex items-center justify-center">
                 <span className="text-[10px] font-mono">A</span>
@@ -63,7 +63,7 @@ export default function Footer() {
           </div>
 
           {/* Protocols */}
-          <div className="md:col-span-2">
+          <div className="col-span-2 md:col-span-2">
             <h4 className="text-xs font-mono text-muted-foreground mb-4">STATUT</h4>
             <div className="bg-secondary/50 rounded-xl p-4 font-mono text-xs">
               <div className="flex items-center justify-between mb-2">

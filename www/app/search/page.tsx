@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { Search, SlidersHorizontal } from "lucide-react"
+import { Search, SlidersHorizontal, Map, List } from "lucide-react"
 import SearchFilters from "@/components/search-filters"
 import SearchMap from "@/components/search-map"
 import VehicleCard from "@/components/vehicle-card"
@@ -22,11 +22,20 @@ interface Vehicle {
 }
 
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-sm text-muted-foreground">Chargement...</p></div>}>
+      <SearchPageInner />
+    </Suspense>
+  )
+}
+
+function SearchPageInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
+  const [mobileView, setMobileView] = useState<"list" | "map">("list")
   const [query, setQuery] = useState(searchParams.get("q") || "")
   const [center, setCenter] = useState<{ lat: number; lng: number } | undefined>()
 
@@ -81,7 +90,7 @@ export default function SearchPage() {
 
       {/* Search bar */}
       <div className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -95,9 +104,15 @@ export default function SearchPage() {
             </div>
             <button
               type="submit"
-              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors hidden sm:block"
             >
               Rechercher
+            </button>
+            <button
+              type="submit"
+              className="bg-primary text-primary-foreground px-3 py-2 rounded-lg sm:hidden"
+            >
+              <Search className="w-4 h-4" />
             </button>
             <button
               type="button"
@@ -110,10 +125,10 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex gap-6">
           {/* Left: Filters + List */}
-          <div className="w-full md:w-1/2 lg:w-2/5 space-y-6">
+          <div className={`w-full md:w-1/2 lg:w-2/5 space-y-4 md:space-y-6 ${mobileView === "map" ? "hidden md:block" : ""}`}>
             {/* Filters */}
             <div className={`bg-card border border-border rounded-xl p-4 ${showFilters ? "block" : "hidden md:block"}`}>
               <h3 className="text-xs font-mono text-muted-foreground mb-3">FILTRES</h3>
@@ -143,7 +158,7 @@ export default function SearchPage() {
           </div>
 
           {/* Right: Map */}
-          <div className="hidden md:block md:w-1/2 lg:w-3/5 sticky top-24 h-[calc(100vh-8rem)]">
+          <div className={`md:w-1/2 lg:w-3/5 sticky top-24 h-[calc(100vh-8rem)] ${mobileView === "map" ? "w-full" : "hidden md:block"}`}>
             <SearchMap
               vehicles={vehicles}
               center={center}
@@ -151,6 +166,26 @@ export default function SearchPage() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Mobile view toggle */}
+      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <button
+          onClick={() => setMobileView(mobileView === "list" ? "map" : "list")}
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-full text-sm font-medium shadow-lg hover:bg-primary/90 transition-colors"
+        >
+          {mobileView === "list" ? (
+            <>
+              <Map className="w-4 h-4" />
+              Carte
+            </>
+          ) : (
+            <>
+              <List className="w-4 h-4" />
+              Liste
+            </>
+          )}
+        </button>
       </div>
     </div>
   )

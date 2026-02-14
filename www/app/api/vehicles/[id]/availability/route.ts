@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, generateId } from "@/lib/db";
+import { query, generateId } from "@/lib/db";
 import { getSessionOrThrow } from "@/lib/auth-helpers";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -7,10 +7,10 @@ type RouteParams = { params: Promise<{ id: string }> };
 // GET /api/vehicles/[id]/availability
 export async function GET(_req: NextRequest, { params }: RouteParams) {
   const { id } = await params;
-  const db = getDb();
-  const slots = db.prepare(
-    "SELECT * FROM vehicle_availability WHERE vehicleId = ? ORDER BY startDate"
-  ).all(id);
+  const slots = await query(
+    `SELECT * FROM vehicle_availability WHERE "vehicleId" = $1 ORDER BY "startDate"`,
+    [id]
+  );
   return NextResponse.json(slots);
 }
 
@@ -19,9 +19,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getSessionOrThrow();
-    const db = getDb();
 
-    const vehicle = db.prepare("SELECT * FROM vehicle WHERE id = ?").get(id) as Record<string, unknown> | undefined;
+    const rows = await query(`SELECT * FROM vehicle WHERE id = $1`, [id]);
+    const vehicle = rows[0] as Record<string, unknown> | undefined;
     if (!vehicle) {
       return NextResponse.json({ error: "Vehicule introuvable" }, { status: 404 });
     }
@@ -37,19 +37,22 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     if (action === "unblock") {
-      db.prepare(
-        "DELETE FROM vehicle_availability WHERE vehicleId = ? AND startDate = ? AND endDate = ? AND reason = 'blocked'"
-      ).run(id, startDate, endDate);
+      await query(
+        `DELETE FROM vehicle_availability WHERE "vehicleId" = $1 AND "startDate" = $2 AND "endDate" = $3 AND reason = 'blocked'`,
+        [id, startDate, endDate]
+      );
     } else {
       const slotId = generateId();
-      db.prepare(
-        "INSERT INTO vehicle_availability (id, vehicleId, startDate, endDate, reason) VALUES (?, ?, ?, ?, 'blocked')"
-      ).run(slotId, id, startDate, endDate);
+      await query(
+        `INSERT INTO vehicle_availability (id, "vehicleId", "startDate", "endDate", reason) VALUES ($1, $2, $3, $4, 'blocked')`,
+        [slotId, id, startDate, endDate]
+      );
     }
 
-    const slots = db.prepare(
-      "SELECT * FROM vehicle_availability WHERE vehicleId = ? ORDER BY startDate"
-    ).all(id);
+    const slots = await query(
+      `SELECT * FROM vehicle_availability WHERE "vehicleId" = $1 ORDER BY "startDate"`,
+      [id]
+    );
 
     return NextResponse.json(slots);
   } catch (e) {

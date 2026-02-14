@@ -1,9 +1,11 @@
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
-import { getDb } from "./db";
+import { Pool } from "@neondatabase/serverless";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export const auth = betterAuth({
-  database: getDb(),
+  database: pool,
   emailAndPassword: {
     enabled: true,
   },

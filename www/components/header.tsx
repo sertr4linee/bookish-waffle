@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "@/lib/auth-client"
-import { Search, CalendarDays, Heart, LayoutDashboard, User, LogOut, ChevronDown } from "lucide-react"
+import { Search, CalendarDays, Heart, LayoutDashboard, User, LogOut, ChevronDown, Menu, X } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
 export default function Header() {
@@ -11,6 +11,7 @@ export default function Header() {
   const pathname = usePathname()
   const userType = (session?.user as Record<string, unknown> | undefined)?.userType as string | undefined
   const isLanding = pathname === "/"
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/40">
@@ -62,7 +63,15 @@ export default function Header() {
               <NavLink href="/bookings" icon={CalendarDays} label="Reservations" pathname={pathname} />
               <NavLink href="/favorites" icon={Heart} label="Favoris" pathname={pathname} />
             </nav>
-            <ProfileDropdown name={session.user.name ?? "Profil"} />
+            <div className="flex items-center gap-2">
+              <ProfileDropdown name={session.user.name ?? "Profil"} />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </>
         ) : userType === "owner" ? (
           // Owner navigation
@@ -71,7 +80,15 @@ export default function Header() {
               <NavLink href="/search" icon={Search} label="Rechercher" pathname={pathname} />
               <NavLink href="/dashboard" icon={LayoutDashboard} label="Tableau de bord" pathname={pathname} />
             </nav>
-            <ProfileDropdown name={session.user.name ?? "Profil"} />
+            <div className="flex items-center gap-2">
+              <ProfileDropdown name={session.user.name ?? "Profil"} />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </>
         ) : (
           // Authenticated but no role yet (pre-onboarding)
@@ -86,6 +103,27 @@ export default function Header() {
           </div>
         )}
       </div>
+
+      {/* Mobile menu */}
+      {session && userType && mobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background">
+          <nav className="max-w-7xl mx-auto px-6 py-3 flex flex-col gap-1">
+            {userType === "customer" ? (
+              <>
+                <MobileNavLink href="/search" icon={Search} label="Rechercher" pathname={pathname} onClose={() => setMobileMenuOpen(false)} />
+                <MobileNavLink href="/bookings" icon={CalendarDays} label="Reservations" pathname={pathname} onClose={() => setMobileMenuOpen(false)} />
+                <MobileNavLink href="/favorites" icon={Heart} label="Favoris" pathname={pathname} onClose={() => setMobileMenuOpen(false)} />
+              </>
+            ) : (
+              <>
+                <MobileNavLink href="/search" icon={Search} label="Rechercher" pathname={pathname} onClose={() => setMobileMenuOpen(false)} />
+                <MobileNavLink href="/dashboard" icon={LayoutDashboard} label="Tableau de bord" pathname={pathname} onClose={() => setMobileMenuOpen(false)} />
+              </>
+            )}
+            <MobileNavLink href="/profile" icon={User} label="Mon profil" pathname={pathname} onClose={() => setMobileMenuOpen(false)} />
+          </nav>
+        </div>
+      )}
     </header>
   )
 }
@@ -97,6 +135,22 @@ function NavLink({ href, icon: Icon, label, pathname }: { href: string; icon: Re
       href={href}
       className={`flex items-center gap-1.5 text-sm transition-colors ${
         active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      <Icon className="w-4 h-4" />
+      {label}
+    </Link>
+  )
+}
+
+function MobileNavLink({ href, icon: Icon, label, pathname, onClose }: { href: string; icon: React.ElementType; label: string; pathname: string; onClose: () => void }) {
+  const active = pathname === href || pathname.startsWith(href + "/")
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+        active ? "text-primary font-medium bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
       }`}
     >
       <Icon className="w-4 h-4" />
@@ -127,7 +181,7 @@ function ProfileDropdown({ name }: { name: string }) {
           {name.charAt(0).toUpperCase()}
         </div>
         <span className="hidden sm:inline">{name}</span>
-        <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        <ChevronDown className="w-3 h-3 text-muted-foreground hidden sm:block" />
       </button>
 
       {open && (

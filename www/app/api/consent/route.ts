@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, generateId } from "@/lib/db";
+import { query, generateId } from "@/lib/db";
 import { getSessionOrThrow } from "@/lib/auth-helpers";
 import { consentSchema } from "@/lib/validators";
 
@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const db = getDb();
     const id = generateId();
 
-    db.prepare(
-      "INSERT INTO consent (id, userId, type, version) VALUES (?, ?, ?, ?)"
-    ).run(id, session.user.id, parsed.data.type, parsed.data.version);
+    await query(
+      `INSERT INTO consent (id, "userId", type, version) VALUES ($1, $2, $3, $4)`,
+      [id, session.user.id, parsed.data.type, parsed.data.version]
+    );
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (e) {
